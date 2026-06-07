@@ -1,0 +1,6 @@
+{
+  "name": "VANZ Dance & Fitness Studio",
+  "description": "指導歴30年の確かな実績を誇るダンス・ヨガ・フィットネススタジオ。「キッズダンス」「エアロビクス」「癒しのヨガ」の無料体験レッスン受付中！",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
