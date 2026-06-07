@@ -37,6 +37,7 @@ export const images = {
   chika: '/assets/images/chika_intora.png',
   akimi: '/assets/images/akimi_intora.png',
   sayaka: '/assets/images/sayaka_intora.png',
+  kana: '/assets/images/kana_intora.png',
   zenntai: '/assets/images/zenntai.png',
   ibent0: '/assets/images/ibent0_1.png',
   butai1: '/assets/images/butai_1.png'
@@ -119,6 +120,8 @@ export const featuredInstructors: FeaturedInstructor[] = [
     experiencePreserveCase: true,
     genres: ['HIPHOP', 'girlsHIPHOP'],
     hobbies: ['音楽を聴くこと', '古着'],
+    image: images.kana,
+    imageAlt: 'kana（インストラクター）',
     messageParagraphs: [
       '小学生の頃からYummyBeatでHIPHOP・girlsHIPHOPを習ってきました。ダンス歴は8年で、得意ジャンルはHIPHOPです。',
       '自分自身も生徒として通っていた経験があるからこそ、初めての不安や「できた！」と感じる楽しさに寄り添いながらレッスンを行います。',
