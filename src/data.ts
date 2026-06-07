@@ -28,20 +28,18 @@ export const studioAddress = {
 
 // Images
 export const images = {
-  logo: '/src/assets/images/logo-vanz.png',
-  hero: '/src/assets/images/top03.png',
-  kids: '/src/assets/images/kizdance_1.png',
-  aerobics: '/src/assets/images/aerobikusu_1.png',
-  yoga: '/src/assets/images/yoga_1.png',
-  miyako: '/src/assets/images/instructor_miyako_1780369556434.png',
-  risa: '/src/assets/images/instructor_risa_1780369575292.png',
-  studioImage: '/src/assets/images/studio_image.png',
-  chika: '/src/assets/images/chika_intora.png',
-  akimi: '/src/assets/images/akimi_intora.png',
-  sayaka: '/src/assets/images/sayaka_intora.png',
-  zenntai: '/src/assets/images/zenntai.png',
-  ibent0: '/src/assets/images/ibent0_1.png',
-  butai1: '/src/assets/images/butai_1.png'
+  logo: '/assets/images/logo-vanz.png',
+  hero: '/assets/images/top03.png',
+  kids: '/assets/images/kizdance_1.png',
+  aerobics: '/assets/images/aerobikusu_1.png',
+  yoga: '/assets/images/yoga_1.png',
+  studioImage: '/assets/images/studio_image.png',
+  chika: '/assets/images/chika_intora.png',
+  akimi: '/assets/images/akimi_intora.png',
+  sayaka: '/assets/images/sayaka_intora.png',
+  zenntai: '/assets/images/zenntai.png',
+  ibent0: '/assets/images/ibent0_1.png',
+  butai1: '/assets/images/butai_1.png'
 };
 
 // Lessons (3 main categories requested)
