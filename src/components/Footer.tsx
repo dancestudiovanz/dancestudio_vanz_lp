@@ -86,12 +86,12 @@ export default function Footer({ onNavigate }: FooterProps) {
           </div>
 
           {/* 右：Google Map */}
-          <div className="w-full sm:flex-1 sm:min-w-0 flex flex-col self-stretch">
-            <div className="flex-1 rounded-2xl overflow-hidden border border-white/10 bg-slate-900 min-h-[240px] sm:min-h-[320px] h-full">
+          <div className="w-full sm:flex-1 sm:min-w-0">
+            <div className="relative w-full h-[280px] sm:min-h-[320px] sm:h-full rounded-2xl overflow-hidden border border-white/10 bg-slate-900">
               <iframe
                 title="dancestudioVANZ 所在地"
                 src={studioAddress.mapEmbedUrl}
-                className="w-full h-full border-0 block"
+                className="absolute inset-0 w-full h-full border-0"
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
                 allowFullScreen

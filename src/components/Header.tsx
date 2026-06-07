@@ -53,14 +53,14 @@ export default function Header({ onNavClick, onNavigate }: HeaderProps) {
           : 'bg-transparent py-4 text-white'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between gap-1.5 sm:gap-3 min-w-0">
           {/* Logo */}
           <div
             onClick={() => handleLinkClick('hero')}
-            className="flex items-center space-x-2 cursor-pointer group"
+            className="flex items-center gap-1.5 sm:gap-2 cursor-pointer group min-w-0 flex-1 lg:flex-none"
           >
-            <div className="flex-shrink-0 h-12 w-12 sm:h-14 sm:w-14 transform group-hover:scale-110 transition-transform duration-200">
+            <div className="flex-shrink-0 h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 transform group-hover:scale-110 transition-transform duration-200">
               <img
                 src={images.logo}
                 alt="dancestudio VANZ ロゴ"
@@ -69,23 +69,23 @@ export default function Header({ onNavClick, onNavigate }: HeaderProps) {
                 }`}
               />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 hidden sm:block">
               <p
-                className={`font-extrabold text-base sm:text-lg md:text-xl tracking-tight leading-tight transition-colors duration-300 ${
+                className={`font-extrabold text-sm sm:text-lg md:text-xl tracking-tight leading-tight transition-colors duration-300 truncate ${
                   isScrolled ? 'text-slate-800' : 'text-white'
                 }`}
               >
                 dancestudioVANZ
               </p>
               <p
-                className={`text-[10px] sm:text-xs font-semibold mt-0.5 leading-snug whitespace-nowrap transition-colors duration-300 ${
+                className={`text-[10px] sm:text-xs font-semibold mt-0.5 leading-snug transition-colors duration-300 hidden md:block ${
                   isScrolled ? 'text-amber-600' : 'text-amber-400'
                 }`}
               >
                 キッズダンス(HIPHOP)・エアロビクス・ヨガ
               </p>
               <p
-                className={`text-[10px] mt-0.5 hidden sm:block ${isScrolled ? 'text-slate-500' : 'text-slate-300'}`}
+                className={`text-[10px] mt-0.5 hidden lg:block ${isScrolled ? 'text-slate-500' : 'text-slate-300'}`}
               >
                 Dance, Yoga & Fitness Studio
               </p>
@@ -93,7 +93,7 @@ export default function Header({ onNavClick, onNavigate }: HeaderProps) {
           </div>
 
           {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-3 xl:gap-4 text-sm font-semibold">
+          <nav className="hidden lg:flex items-center gap-3 xl:gap-4 text-sm font-semibold shrink-0">
             {navItems.map((item) => (
               <button
                 key={item.id}
@@ -108,29 +108,33 @@ export default function Header({ onNavClick, onNavigate }: HeaderProps) {
           </nav>
 
           {/* CTA + Menu */}
-          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+          <div className="flex items-center gap-1 sm:gap-1.5 shrink-0">
             <a
               href={officialLineUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 px-3 py-2 rounded-full text-[11px] sm:text-xs font-bold text-white bg-[#06C755] shadow-md hover:bg-[#05b34c] transition-all whitespace-nowrap"
+              aria-label="公式LINEで無料体験を申し込む"
+              className="flex items-center justify-center gap-1 p-2 sm:px-3 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold text-white bg-[#06C755] shadow-md hover:bg-[#05b34c] transition-all whitespace-nowrap"
             >
-              <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span>無料体験</span>
+              <Calendar className="w-4 h-4 shrink-0" />
+              <span className="hidden min-[400px]:inline">無料体験</span>
             </a>
             <button
               type="button"
               onClick={() => onNavigate('member-board')}
-              className="flex items-center gap-1 px-3 py-2 rounded-full text-[11px] sm:text-xs font-bold text-white bg-rose-500 shadow-md hover:bg-rose-600 transition-all whitespace-nowrap cursor-pointer"
+              aria-label="会員専用掲示板"
+              className="flex items-center justify-center gap-1 p-2 sm:px-3 sm:py-2 rounded-full text-[11px] sm:text-xs font-bold text-white bg-rose-500 shadow-md hover:bg-rose-600 transition-all whitespace-nowrap cursor-pointer"
             >
-              <ClipboardList className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-              <span className="hidden min-[420px]:inline">会員専用掲示板</span>
-              <span className="min-[420px]:hidden">掲示板</span>
+              <ClipboardList className="w-4 h-4 shrink-0" />
+              <span className="hidden min-[480px]:inline">会員専用掲示板</span>
+              <span className="hidden min-[400px]:inline min-[480px]:hidden">掲示板</span>
             </button>
 
             <button
+              type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className={`lg:hidden p-2 rounded-lg cursor-pointer ${
+              aria-label={mobileMenuOpen ? 'メニューを閉じる' : 'メニューを開く'}
+              className={`lg:hidden p-2 rounded-lg shrink-0 cursor-pointer ${
                 isScrolled ? 'text-slate-700 hover:bg-slate-100' : 'text-slate-200 hover:bg-white/10'
               }`}
             >
