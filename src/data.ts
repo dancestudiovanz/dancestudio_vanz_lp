@@ -47,7 +47,7 @@ export const images = {
 export const lessons: Lesson[] = [
   {
     id: 'lesson-kids',
-    title: 'キッズダンス（ジュニアダンス）',
+    title: 'キッズダンス（YummyBeat）',
     category: 'kids',
     categoryLabel: 'キッズダンス',
     description:
