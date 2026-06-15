@@ -1,0 +1,334 @@
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    padding: 16px;
+    font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #222;
+    background: #fff;
+  }
+
+  .board-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px 16px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .board-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  .board-count {
+    font-size: 13px;
+    color: #666;
+  }
+
+  .post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+  }
+
+  .post-card {
+    border: 1px solid #d8dee8;
+    border-radius: 10px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  }
+
+  .post-summary {
+    display: grid;
+    grid-template-columns: 96px minmax(0, 1fr) auto;
+    grid-template-areas:
+      'date badges btn'
+      'date title btn';
+    align-items: center;
+    gap: 8px 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+    background: #fafbfc;
+  }
+
+  .post-summary.open {
+    border-bottom: 1px solid #e8ecf2;
+  }
+
+  .post-date {
+    grid-area: date;
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    white-space: nowrap;
+  }
+
+  .post-badges {
+    grid-area: badges;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    min-height: 0;
+  }
+
+  .post-title {
+    grid-area: title;
+    font-weight: 700;
+    font-size: 15px;
+    line-height: 1.5;
+    color: #111827;
+  }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+
+  .badge-category {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  .badge-category-衣装 {
+    background: #ede9fe;
+    color: #6d28d9;
+  }
+
+  .badge-category-おしらせ {
+    background: #ffedd5;
+    color: #c2410c;
+  }
+
+  .badge-weekday {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+  }
+
+  .badge-class {
+    background: #fce7f3;
+    color: #be185d;
+  }
+
+  .badge-class-低学年 {
+    background: #fef3c7;
+    color: #b45309;
+  }
+
+  .badge-class-can-bang,
+  .badge-class-can☆bang {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+
+  .badge-class-vanz {
+    background: #dcfce7;
+    color: #15803d;
+  }
+
+  .badge-class-hiphop {
+    background: #f3f4f6;
+    color: #374151;
+  }
+
+  .toggle-btn {
+    grid-area: btn;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #475569;
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .post-detail {
+    display: none;
+    padding: 16px;
+    color: #334155;
+    font-size: 14px;
+    line-height: 1.8;
+    background: #fff;
+  }
+
+  .post-detail.open {
+    display: block;
+  }
+
+  .post-body-text {
+    margin-bottom: 12px;
+  }
+
+  .post-detail a {
+    color: #1a73e8;
+    word-break: break-all;
+  }
+
+  .post-link-wrap {
+    margin: 0 0 12px;
+  }
+
+  .post-link {
+    display: inline-block;
+    padding: 8px 14px;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    background: #eff6ff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+  }
+
+  .post-link:hover {
+    background: #dbeafe;
+  }
+
+  .post-images {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+  }
+
+  .post-images img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
+  .pagination {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .pagination a,
+  .pagination span {
+    display: inline-block;
+    padding: 6px 14px;
+    border: 1px solid #ccc;
+    border-radius: 999px;
+    text-decoration: none;
+    color: #333;
+    font-size: 13px;
+    background: #fff;
+  }
+
+  .pagination a:hover {
+    background: #f5f5f5;
+  }
+
+  .pagination .disabled {
+    color: #aaa;
+    pointer-events: none;
+    background: #fafafa;
+  }
+
+  .empty-message {
+    padding: 32px 0;
+    text-align: center;
+    color: #666;
+  }
+
+  /* login */
+  .login-wrap {
+    max-width: 360px;
+    margin: 40px auto;
+    padding: 24px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+  }
+
+  .login-wrap h1 {
+    margin: 0 0 8px;
+    font-size: 18px;
+  }
+
+  .login-wrap p {
+    margin: 0 0 16px;
+    color: #666;
+    font-size: 13px;
+  }
+
+  .login-wrap label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .login-wrap input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
+  .login-wrap button {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 6px;
+    background: #e11d48;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .login-wrap button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+
+  .login-error {
+    color: #b91c1c;
+    font-size: 13px;
+    margin-bottom: 12px;
+    min-height: 1.2em;
+  }
+
+  @media (max-width: 640px) {
+    .post-summary {
+      grid-template-columns: 1fr auto;
+      grid-template-areas:
+        'date btn'
+        'badges badges'
+        'title title';
+    }
+
+    .post-date {
+      font-size: 12px;
+    }
+  }
+</style>

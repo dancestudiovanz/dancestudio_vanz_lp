@@ -17,7 +17,7 @@ import Footer from './components/Footer';
 import TermsOfService from './components/TermsOfService';
 import SpecifiedCommercialTransactions from './components/SpecifiedCommercialTransactions';
 import PrivacyPolicy from './components/PrivacyPolicy';
-import MemberBoardPlaceholder from './components/MemberBoardPlaceholder';
+import MemberBoard from './components/MemberBoard';
 import { AppPage, navigateApp, pageFromHash } from './appNavigation';
 
 export default function App() {
@@ -58,7 +58,7 @@ export default function App() {
   }
 
   if (page === 'member-board') {
-    return <MemberBoardPlaceholder onNavigate={goToPage} />;
+    return <MemberBoard onNavigate={goToPage} />;
   }
 
   return (
