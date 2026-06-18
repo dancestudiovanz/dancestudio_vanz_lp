@@ -16,7 +16,11 @@ export default function Hero() {
       <div className="absolute inset-0 z-0">
         <img
           src={images.hero}
-          alt="VANZ Kids Dance School"
+          alt="武豊町のキッズダンス教室 dancestudio VANZ"
+          width="1600"
+          height="900"
+          decoding="async"
+          fetchPriority="high"
           className="w-full h-full object-cover opacity-90 md:opacity-95 brightness-110 contrast-[1.02] saturate-[1.05] animate-subtle-zoom"
           referrerPolicy="no-referrer"
         />
@@ -45,7 +49,7 @@ export default function Hero() {
 
             <div className="space-y-3 md:space-y-4">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
-                人見知りでも、初めてでも大丈夫。
+                武豊町で、初めてでも大丈夫。
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-rose-500 to-amber-500 font-black">
                   お子さまが笑顔で通えるキッズダンス教室

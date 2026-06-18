@@ -27,6 +27,10 @@ export default function RentalStudio() {
             <img
               src={images.studioImage}
               alt="レンタルスタジオの様子"
+              width="1200"
+              height="900"
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover scale-[1.22] [object-position:42%_28%]"
               referrerPolicy="no-referrer"
             />

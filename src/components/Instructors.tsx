@@ -94,6 +94,10 @@ function FeaturedInstructorCard({ instructor }: { instructor: FeaturedInstructor
                 <img
                   src={instructor.image}
                   alt={instructor.imageAlt ?? instructor.name}
+                  width="600"
+                  height="800"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover object-top"
                   referrerPolicy="no-referrer"
                 />
@@ -145,6 +149,10 @@ export default function Instructors() {
                 <img
                   src={inst.image}
                   alt={inst.name}
+                  width="1200"
+                  height="900"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                 />
@@ -197,6 +205,10 @@ export default function Instructors() {
                   <img
                     src={selectedInstructor.image}
                     alt={selectedInstructor.name}
+                    width="128"
+                    height="128"
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
                   />

@@ -69,6 +69,10 @@ export default function Solutions() {
                     <img
                       src={imageSrc}
                       alt={solution.title}
+                      width="1200"
+                      height="900"
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                       referrerPolicy="no-referrer"
                     />

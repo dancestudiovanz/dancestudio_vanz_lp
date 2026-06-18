@@ -24,6 +24,10 @@ export default function Footer({ onNavigate }: FooterProps) {
                 <img
                   src={images.logo}
                   alt="dancestudio VANZ ロゴ"
+                  width="56"
+                  height="56"
+                  loading="lazy"
+                  decoding="async"
                   className="h-full w-full object-contain object-center brightness-0 invert"
                 />
               </div>
@@ -51,6 +55,9 @@ export default function Footer({ onNavigate }: FooterProps) {
                     <br />
                     {studioAddress.access}
                   </span>
+                </li>
+                <li className="text-[10px] text-slate-400 leading-relaxed">
+                  愛知県知多郡武豊町道崎12-3、知多武豊駅から徒歩3分。キッズダンス / HIPHOP / エアロビクス / ヨガの無料体験受付中です。
                 </li>
               </ul>
             </div>

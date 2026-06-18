@@ -21,7 +21,7 @@ export const officialInstagramUrl = 'https://www.instagram.com/dancestudio_vanz/
 
 export const studioAddress = {
   postal: '470-2347',
-  line: '愛知県知多郡武豊町道崎12‐3',
+  line: '愛知県知多郡武豊町道崎12-3',
   access: '知多武豊駅から徒歩3分（専用駐車場あり）',
   mapEmbedUrl: `https://maps.google.com/maps?q=${encodeURIComponent('愛知県知多郡武豊町道崎12-3')}&hl=ja&z=16&output=embed`
 };

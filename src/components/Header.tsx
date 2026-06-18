@@ -64,6 +64,9 @@ export default function Header({ onNavClick, onNavigate }: HeaderProps) {
               <img
                 src={images.logo}
                 alt="dancestudio VANZ ロゴ"
+                width="56"
+                height="56"
+                decoding="async"
                 className={`h-full w-full object-contain object-center transition-all duration-300 ${
                   isScrolled ? 'brightness-0' : 'brightness-0 invert'
                 }`}

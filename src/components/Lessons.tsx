@@ -122,6 +122,10 @@ export default function Lessons() {
                 <img
                   src={lesson.image}
                   alt={lesson.title}
+                  width="1200"
+                  height="900"
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                   referrerPolicy="no-referrer"
                 />
