@@ -49,10 +49,10 @@ export default function Hero() {
 
             <div className="space-y-3 md:space-y-4">
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
-                武豊町で、初めてでも大丈夫。
+                知多郡武豊町で、
                 <br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-rose-500 to-amber-500 font-black">
-                  お子さまが笑顔で通えるキッズダンス教室
+                  お子さまが笑顔で通えるキッズダンス教室。
                 </span>
               </h1>
               <p className="text-base sm:text-lg md:text-xl font-bold text-slate-50 leading-relaxed max-w-xl drop-shadow-[0_3px_12px_rgba(0,0,0,0.95)]">
