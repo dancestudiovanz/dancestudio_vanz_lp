@@ -1,11 +1,11 @@
 /**
  * スプレッドシート読み取り
  *
- * 列構成（A〜H）:
- * 投稿日 | カテゴリー | タイトル | 曜日 | クラス | 本文 | URL | 添付画像
+ * 列構成（A〜K）:
+ * 投稿日 | カテゴリー | タイトル | 曜日 | クラス | 本文 | URL | 画像1 | 画像2 | 画像3 | 画像4
  */
 
-var SHEET_COLUMN_COUNT = 8;
+var SHEET_COLUMN_COUNT = 11;
 
 function getPostsSheet_() {
   var ss = SpreadsheetApp.openById(getSpreadsheetId_());
@@ -17,7 +17,7 @@ function getPostsSheet_() {
 }
 
 function getSheetHeaders_() {
-  return ['投稿日', 'カテゴリー', 'タイトル', '曜日', 'クラス', '本文', 'URL', '添付画像'];
+  return ['投稿日', 'カテゴリー', 'タイトル', '曜日', 'クラス', '本文', 'URL', '画像1', '画像2', '画像3', '画像4'];
 }
 
 function formatPostDate_(value) {
@@ -73,6 +73,29 @@ function parseImageUrls_(value) {
     });
 }
 
+function collectImageUrls_(row) {
+  var urls = [];
+  var seen = {};
+
+  function pushUrl(url) {
+    var key = String(url || '').trim();
+    if (!key || seen[key]) {
+      return;
+    }
+    seen[key] = true;
+    urls.push(key);
+  }
+
+  // 旧仕様: H列にJSON/改行/カンマ区切り
+  parseImageUrls_(row[7]).forEach(pushUrl);
+  // 新仕様: H〜K列に1件ずつ
+  parseImageUrls_(row[8]).forEach(pushUrl);
+  parseImageUrls_(row[9]).forEach(pushUrl);
+  parseImageUrls_(row[10]).forEach(pushUrl);
+
+  return urls.slice(0, 4);
+}
+
 function getPublishedPosts(page, pageSize) {
   var sheet = getPostsSheet_();
   var lastRow = sheet.getLastRow();
@@ -101,7 +124,7 @@ function getPublishedPosts(page, pageSize) {
       className: String(row[4] || '').trim(),
       body: String(row[5] || ''),
       url: String(row[6] || '').trim(),
-      imageUrls: parseImageUrls_(row[7])
+      imageUrls: collectImageUrls_(row)
     });
   }
 

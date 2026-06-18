@@ -74,6 +74,10 @@ function getMemberViewPassword_() {
   return getScriptProp_('MEMBER_VIEW_PASSWORD');
 }
 
+function getAdminDashboardPassword_() {
+  return getScriptProp_('ADMIN_DASHBOARD_PASSWORD');
+}
+
 function getSessionSecret_() {
   var secret = PropertiesService.getScriptProperties().getProperty('SESSION_SECRET');
   if (!secret) {
@@ -89,6 +93,7 @@ function getSessionSecret_() {
 function setupSecrets() {
   PropertiesService.getScriptProperties().setProperties({
     MEMBER_VIEW_PASSWORD: '会員に共有するパスワード',
+    ADMIN_DASHBOARD_PASSWORD: '管理画面用パスワード',
     DRIVE_FOLDER_ID: 'DriveフォルダID（任意）',
     SPREADSHEET_ID: 'スプレッドシートID'
   });

@@ -1,11 +1,12 @@
 /**
  * LINE Messaging API Webhook
- *
- * @deprecated LINE投稿は廃止しました。投稿はスプレッドシートから行ってください。
- * doPost は無効化されており、このファイルは参照用に残しています。
+ * 投稿用LINEに届いたメッセージから掲示板投稿を作成する
  */
 
-var POST_WAIT_MS = 3000;
+var POST_CATEGORY_OPTIONS = ['曲', '衣装', 'おしらせ'];
+var POST_WEEKDAY_OPTIONS = ['月', '水', '金', '空欄'];
+var POST_CLASS_OPTIONS = ['幼児', '低学年', 'can☆bang', 'vanZ', 'HIPHOP', '空欄'];
+var POST_IMAGE_MAX = 4;
 
 function processLineWebhook_(body, signature) {
   if (!isLineWebhookBody_(body)) {
@@ -43,6 +44,9 @@ function isLineWebhookBody_(body) {
 }
 
 function handleLineWebhook_(e) {
+  if (!e || !e.postData || !e.postData.contents) {
+    return ContentService.createTextOutput('No post body').setMimeType(ContentService.MimeType.TEXT);
+  }
   return processLineWebhook_(e.postData.contents, getPostHeader_(e, 'X-Line-Signature'));
 }
 
@@ -72,24 +76,18 @@ function handleLineEvent_(event) {
       last_line_user_id_at: new Date().toISOString()
     });
 
-    if (userId !== getAdminLineUserId_()) {
-      notifyAdmin_(
-        event.replyToken,
-        userId,
-        '管理者IDが一致しません。\nScript Properties の ADMIN_LINE_USER_ID を確認してください。'
-      );
-      saveWebhookDebug_('管理者ID不一致: 送信=' + userId);
+    var message = event.message || {};
+    if (message.type === 'text') {
+      handleAdminTextMessage_(event.replyToken, userId, message.text);
       return;
     }
 
-    var message = event.message;
-    if (message.type === 'text') {
-      handleAdminTextMessage_(event.replyToken, userId, message.text);
-    } else if (message.type === 'image') {
+    if (message.type === 'image') {
       handleAdminImageMessage_(event.replyToken, userId, message.id);
-    } else {
-      notifyAdmin_(event.replyToken, userId, 'テキストまたは画像を送信してください。');
+      return;
     }
+
+    notifyAdmin_(event.replyToken, userId, 'テキストまたは画像を送信してください。');
   } catch (err) {
     saveWebhookDebug_('handleLineEvent エラー: ' + err.message);
     PropertiesService.getScriptProperties().setProperty(
@@ -102,13 +100,14 @@ function handleLineEvent_(event) {
 
 function handleAdminTextMessage_(replyToken, userId, text) {
   var trimmed = (text || '').trim();
+
   if (!trimmed) {
     notifyAdmin_(replyToken, userId, 'テキストを入力してください。');
     return;
   }
 
-  if (trimmed === '投稿') {
-    confirmDraft_(replyToken, userId);
+  if (trimmed === 'ヘルプ' || trimmed === 'help') {
+    sendPostHelp_(replyToken, userId);
     return;
   }
 
@@ -118,80 +117,247 @@ function handleAdminTextMessage_(replyToken, userId, text) {
     return;
   }
 
-  if (trimmed === 'ヘルプ' || trimmed === 'help') {
-    notifyAdmin_(
-      replyToken,
-      userId,
-      '【投稿手順】\n' +
-        '1. 1通目（テキスト）\n' +
-        '   1行目 = タイトル\n' +
-        '   2行目以降 = 本文（URLもここに含める）\n' +
-        '2. 画像を送信（任意）\n' +
-        '3. 少し待ってから「投稿」\n\n' +
-        '※「投稿」するまでスプシには載りません\n' +
-        '「キャンセル」で下書き破棄'
-    );
+  if (trimmed === '投稿') {
+    startPostFlow_(replyToken, userId);
     return;
   }
 
-  var existingDraft = getDraft_(userId);
-
-  // タイトル設定済み → 追加分は本文に追加（上書きしない）
-  if (existingDraft && existingDraft.title) {
-    existingDraft.body = (existingDraft.body ? existingDraft.body + '\n' : '') + trimmed;
-    existingDraft.updatedAt = Date.now();
-    saveDraft_(userId, existingDraft);
-    notifyAdmin_(
-      replyToken,
-      userId,
-      formatDraftSavedMessage_(existingDraft, '本文に追加しました。')
-    );
+  var draft = getDraft_(userId);
+  if (!draft || !draft.step) {
+    notifyAdmin_(replyToken, userId, '「投稿」と送ると入力を開始します。');
     return;
   }
 
-  var lines = trimmed.split(/\r?\n/);
-  var title = (lines[0] || '').trim();
-  var body = lines.slice(1).join('\n').trim();
-
-  if (!title) {
-    notifyAdmin_(replyToken, userId, '1行目にタイトルを入力してください。');
-    return;
-  }
-
-  var draft = { title: title, body: body, imageUrls: [] };
-  draft.updatedAt = Date.now();
-  saveDraft_(userId, draft);
-
-  notifyAdmin_(replyToken, userId, formatDraftSavedMessage_(draft, '下書きを保存しました。'));
+  proceedDraftStepByText_(replyToken, userId, draft, trimmed);
 }
 
-function formatDraftSavedMessage_(draft, headline) {
-  var bodyPreview = draft.body || '（なし）';
-  if (bodyPreview.length > 80) {
-    bodyPreview = bodyPreview.slice(0, 80) + '...';
+function startPostFlow_(replyToken, userId) {
+  var draft = {
+    step: 'awaitCategory',
+    category: '',
+    title: '',
+    weekday: '',
+    className: '',
+    body: '',
+    imageUrls: [],
+    createdAt: Date.now(),
+    updatedAt: Date.now()
+  };
+
+  saveDraft_(userId, draft);
+  sendCategoryPrompt_(replyToken, userId);
+}
+
+function proceedDraftStepByText_(replyToken, userId, draft, text) {
+  switch (draft.step) {
+    case 'awaitCategory':
+      if (POST_CATEGORY_OPTIONS.indexOf(text) === -1) {
+        sendCategoryPrompt_(replyToken, userId, 'カテゴリーは選択肢から選んでください。');
+        return;
+      }
+
+      draft.category = text;
+      draft.step = 'awaitTitle';
+      draft.updatedAt = Date.now();
+      saveDraft_(userId, draft);
+      notifyAdmin_(replyToken, userId, '②タイトルを入力してください。\n例: 4月分衣装');
+      return;
+
+    case 'awaitTitle':
+      draft.title = text;
+      draft.step = 'awaitWeekday';
+      draft.updatedAt = Date.now();
+      saveDraft_(userId, draft);
+      sendWeekdayPrompt_(replyToken, userId);
+      return;
+
+    case 'awaitWeekday':
+      if (POST_WEEKDAY_OPTIONS.indexOf(text) === -1) {
+        sendWeekdayPrompt_(replyToken, userId, '曜日は選択肢から選んでください。');
+        return;
+      }
+
+      draft.weekday = text === '空欄' ? '' : text;
+      draft.step = 'awaitClassName';
+      draft.updatedAt = Date.now();
+      saveDraft_(userId, draft);
+      sendClassPrompt_(replyToken, userId);
+      return;
+
+    case 'awaitClassName':
+      if (POST_CLASS_OPTIONS.indexOf(text) === -1) {
+        sendClassPrompt_(replyToken, userId, 'クラスは選択肢から選んでください。');
+        return;
+      }
+
+      draft.className = text === '空欄' ? '' : text;
+      draft.step = 'awaitBody';
+      draft.updatedAt = Date.now();
+      saveDraft_(userId, draft);
+      notifyAdmin_(
+        replyToken,
+        userId,
+        '⑤本文を入力してください。\nURLは本文にそのまま貼ってOKです。'
+      );
+      return;
+
+    case 'awaitBody':
+      draft.body = text;
+      draft.step = 'awaitImagesOrDone';
+      draft.updatedAt = Date.now();
+      saveDraft_(userId, draft);
+      sendImageOrConfirmPrompt_(replyToken, userId, draft);
+      return;
+
+    case 'awaitImagesOrDone':
+      if (text === '確認') {
+        draft.step = 'awaitConfirm';
+        draft.updatedAt = Date.now();
+        saveDraft_(userId, draft);
+        sendConfirmPrompt_(replyToken, userId, draft);
+        return;
+      }
+
+      if (text === '本文追記') {
+        draft.step = 'awaitBodyAppend';
+        draft.updatedAt = Date.now();
+        saveDraft_(userId, draft);
+        notifyAdmin_(replyToken, userId, '追記する本文を送信してください。');
+        return;
+      }
+
+      notifyAdmin_(
+        replyToken,
+        userId,
+        '画像を送るか「確認」を送ってください。本文追記は「本文追記」です。'
+      );
+      return;
+
+    case 'awaitBodyAppend':
+      draft.body = (draft.body ? draft.body + '\n' : '') + text;
+      draft.step = 'awaitImagesOrDone';
+      draft.updatedAt = Date.now();
+      saveDraft_(userId, draft);
+      sendImageOrConfirmPrompt_(replyToken, userId, draft, '本文を追記しました。');
+      return;
+
+    case 'awaitConfirm':
+      if (text === '送信') {
+        publishDraft_(replyToken, userId, draft);
+        return;
+      }
+
+      if (text === '修正') {
+        draft.step = 'awaitBodyAppend';
+        draft.updatedAt = Date.now();
+        saveDraft_(userId, draft);
+        notifyAdmin_(replyToken, userId, '修正本文を送信してください（追記されます）。');
+        return;
+      }
+
+      notifyAdmin_(replyToken, userId, '「送信」で投稿確定、「修正」で本文追記できます。');
+      return;
+
+    default:
+      clearDraft_(userId);
+      notifyAdmin_(replyToken, userId, 'セッションが不正です。もう一度「投稿」と送ってください。');
+      return;
   }
-  return (
-    headline +
-    '\n\n' +
-    'タイトル:\n' +
-    draft.title +
-    '\n\n' +
-    '本文:\n' +
-    bodyPreview +
-    '\n\n' +
-    '画像があれば送信し、\n' +
-    '少し待ってから「投稿」と送ってください。'
+}
+
+function sendPostHelp_(replyToken, userId) {
+  notifyAdmin_(
+    replyToken,
+    userId,
+    '【投稿手順】\n' +
+      '1. 「投稿」\n' +
+      '2. カテゴリー→タイトル→曜日→クラス→本文を入力\n' +
+      '3. 画像を最大4枚送信（任意）\n' +
+      '4. 「確認」→「送信」で投稿確定\n' +
+      '※中断は「キャンセル」'
   );
+}
+
+function sendCategoryPrompt_(replyToken, userId, prefix) {
+  sendQuickReply_(
+    replyToken,
+    userId,
+    (prefix ? prefix + '\n' : '') + '①カテゴリーを選択してください。',
+    POST_CATEGORY_OPTIONS
+  );
+}
+
+function sendWeekdayPrompt_(replyToken, userId, prefix) {
+  sendQuickReply_(
+    replyToken,
+    userId,
+    (prefix ? prefix + '\n' : '') + '③曜日を選択してください。',
+    POST_WEEKDAY_OPTIONS
+  );
+}
+
+function sendClassPrompt_(replyToken, userId, prefix) {
+  sendQuickReply_(
+    replyToken,
+    userId,
+    (prefix ? prefix + '\n' : '') + '④クラスを選択してください。',
+    POST_CLASS_OPTIONS
+  );
+}
+
+function sendImageOrConfirmPrompt_(replyToken, userId, draft, prefix) {
+  var imageCount = (draft.imageUrls || []).length;
+  sendQuickReply_(
+    replyToken,
+    userId,
+    (prefix ? prefix + '\n' : '') +
+      '⑥画像を送信してください（最大4枚）。\n現在: ' +
+      imageCount +
+      '枚\n完了する場合は「確認」を選択。',
+    ['確認', '本文追記', 'キャンセル']
+  );
+}
+
+function sendConfirmPrompt_(replyToken, userId, draft) {
+  var summary =
+    '【確認】\n' +
+    'カテゴリー: ' +
+    (draft.category || '（なし）') +
+    '\n' +
+    'タイトル: ' +
+    (draft.title || '（なし）') +
+    '\n' +
+    '曜日: ' +
+    (draft.weekday || '（空欄）') +
+    '\n' +
+    'クラス: ' +
+    (draft.className || '（空欄）') +
+    '\n' +
+    '本文: ' +
+    (draft.body ? '\n' + draft.body : '（なし）') +
+    '\n\n画像: ' +
+    (draft.imageUrls || []).length +
+    '枚';
+
+  sendQuickReply_(replyToken, userId, summary, ['送信', '修正', 'キャンセル']);
 }
 
 function handleAdminImageMessage_(replyToken, userId, messageId) {
   var draft = getDraft_(userId);
-  if (!draft || !draft.title) {
+
+  if (!draft || draft.step !== 'awaitImagesOrDone') {
     notifyAdmin_(
       replyToken,
       userId,
-      '先にテキストを送信してください。\n（1行目=タイトル、2行目以降=本文）'
+      '画像は本文入力後に受け付けます。先に「投稿」で入力を開始してください。'
     );
+    return;
+  }
+
+  draft.imageUrls = draft.imageUrls || [];
+
+  if (draft.imageUrls.length >= POST_IMAGE_MAX) {
+    notifyAdmin_(replyToken, userId, '画像は最大' + POST_IMAGE_MAX + '枚までです。');
     return;
   }
 
@@ -199,58 +365,43 @@ function handleAdminImageMessage_(replyToken, userId, messageId) {
     var blob = downloadLineImage_(messageId);
     var filename = 'board_' + userId.slice(-6) + '_' + Date.now() + '.jpg';
     var saved = saveImageToDrive_(blob, filename);
-    draft.imageUrls = draft.imageUrls || [];
+
     draft.imageUrls.push(saved.url);
     draft.updatedAt = Date.now();
     saveDraft_(userId, draft);
 
-    notifyAdmin_(
+    sendImageOrConfirmPrompt_(
       replyToken,
       userId,
-      '画像を追加しました（' +
-        draft.imageUrls.length +
-        '枚）。\n少し待ってから「投稿」と送ってください。'
+      draft,
+      '画像を追加しました（' + draft.imageUrls.length + '/' + POST_IMAGE_MAX + '）。'
     );
   } catch (err) {
     notifyAdmin_(replyToken, userId, '画像の保存に失敗しました: ' + err.message);
   }
 }
 
-function confirmDraft_(replyToken, userId) {
-  var draft = getDraft_(userId);
-  if (!draft || !draft.title) {
-    notifyAdmin_(
-      replyToken,
-      userId,
-      '下書きがありません。\n\n' +
-        '1. 1行目=タイトル、2行目以降=本文（URL含む）\n' +
-        '2. 画像（任意）\n' +
-        '3. 少し待ってから「投稿」'
-    );
-    return;
-  }
-
-  // 画像メッセージの処理完了を待つ
-  Utilities.sleep(POST_WAIT_MS);
-  draft = getDraft_(userId);
-
-  if (!draft || !draft.title) {
-    notifyAdmin_(replyToken, userId, '下書きが見つかりません。もう一度テキストから送ってください。');
+function publishDraft_(replyToken, userId, draft) {
+  if (!draft.category || !draft.title || !draft.body) {
+    notifyAdmin_(replyToken, userId, '必須項目が不足しています。キャンセルして再実行してください。');
     return;
   }
 
   try {
-    var postId = publishPost_(draft.title, draft.body || '', draft.imageUrls || []);
+    var row = buildPostRowFromDraft_(draft);
+    var rowIndex = appendPostRow_(row);
+
     clearDraft_(userId);
+
     PropertiesService.getScriptProperties().setProperty(
       'last_publish_debug',
-      '成功 ID=' + postId + ' at ' + new Date().toISOString()
+      '成功 row=' + rowIndex + ' at ' + new Date().toISOString()
     );
-    var imageCount = (draft.imageUrls || []).length;
+
     notifyAdmin_(
       replyToken,
       userId,
-      '掲示板に投稿しました（ID: ' + postId + '）。\n画像: ' + imageCount + '枚'
+      '掲示板に投稿しました。\n行番号: ' + rowIndex + '\n画像: ' + (draft.imageUrls || []).length + '枚'
     );
   } catch (err) {
     PropertiesService.getScriptProperties().setProperty(
@@ -261,15 +412,62 @@ function confirmDraft_(replyToken, userId) {
   }
 }
 
+function buildPostRowFromDraft_(draft) {
+  var images = normalizeImageUrls_(draft.imageUrls || []);
+
+  return [
+    Utilities.formatDate(new Date(), 'Asia/Tokyo', 'yyyy-MM-dd'),
+    draft.category || '',
+    draft.title || '',
+    draft.weekday || '',
+    draft.className || '',
+    draft.body || '',
+    '',
+    images[0] || '',
+    images[1] || '',
+    images[2] || '',
+    images[3] || ''
+  ];
+}
+
+function appendPostRow_(row) {
+  var sheet = getPostsSheet_();
+  sheet.appendRow(row);
+  return sheet.getLastRow();
+}
+
+function normalizeImageUrls_(urls) {
+  var result = [];
+
+  for (var i = 0; i < urls.length; i++) {
+    var url = String(urls[i] || '').trim();
+    if (url) {
+      result.push(url);
+    }
+
+    if (result.length >= POST_IMAGE_MAX) {
+      break;
+    }
+  }
+
+  while (result.length < POST_IMAGE_MAX) {
+    result.push('');
+  }
+
+  return result;
+}
+
 function getDraftKey_(userId) {
   return 'draft_' + userId;
 }
 
 function getDraft_(userId) {
   var raw = PropertiesService.getScriptProperties().getProperty(getDraftKey_(userId));
+
   if (!raw) {
     return null;
   }
+
   try {
     return JSON.parse(raw);
   } catch (e) {
@@ -286,17 +484,51 @@ function clearDraft_(userId) {
 }
 
 function notifyAdmin_(replyToken, userId, text) {
+  notifyAdminMessage_(replyToken, userId, [{ type: 'text', text: text }]);
+}
+
+function sendQuickReply_(replyToken, userId, text, labels) {
+  var items = labels.map(function (label) {
+    return {
+      type: 'action',
+      action: {
+        type: 'message',
+        label: label,
+        text: label
+      }
+    };
+  });
+
+  notifyAdminMessage_(replyToken, userId, [
+    {
+      type: 'text',
+      text: text,
+      quickReply: {
+        items: items
+      }
+    }
+  ]);
+}
+
+function notifyAdminMessage_(replyToken, userId, messages) {
   var replied = false;
+
   if (replyToken) {
-    replied = replyLineMessage_(replyToken, text);
+    replied = replyLineMessages_(replyToken, messages);
   }
+
   if (!replied) {
-    pushLineMessage_(userId, text);
+    pushLineMessages_(userId, messages);
   }
 }
 
 function pushLineMessage_(userId, text) {
+  return pushLineMessages_(userId, [{ type: 'text', text: text }]);
+}
+
+function pushLineMessages_(userId, messages) {
   var url = 'https://api.line.me/v2/bot/message/push';
+
   var response = UrlFetchApp.fetch(url, {
     method: 'post',
     contentType: 'application/json',
@@ -305,7 +537,7 @@ function pushLineMessage_(userId, text) {
     },
     payload: JSON.stringify({
       to: userId,
-      messages: [{ type: 'text', text: text }]
+      messages: messages
     }),
     muteHttpExceptions: true
   });
@@ -316,11 +548,13 @@ function pushLineMessage_(userId, text) {
     );
     return false;
   }
+
   return true;
 }
 
 function downloadLineImage_(messageId) {
   var url = 'https://api-data.line.me/v2/bot/message/' + messageId + '/content';
+
   var response = UrlFetchApp.fetch(url, {
     method: 'get',
     headers: {
@@ -337,10 +571,15 @@ function downloadLineImage_(messageId) {
 }
 
 function replyLineMessage_(replyToken, text) {
+  return replyLineMessages_(replyToken, [{ type: 'text', text: text }]);
+}
+
+function replyLineMessages_(replyToken, messages) {
   var url = 'https://api.line.me/v2/bot/message/reply';
+
   var payload = {
     replyToken: replyToken,
-    messages: [{ type: 'text', text: text }]
+    messages: messages
   };
 
   var response = UrlFetchApp.fetch(url, {
@@ -359,9 +598,40 @@ function replyLineMessage_(replyToken, text) {
     );
     return false;
   }
+
   return true;
 }
 
 function createTextResponse_(text, status) {
   return ContentService.createTextOutput(text).setMimeType(ContentService.MimeType.TEXT);
+}
+
+function getPostHeader_(e, name) {
+  var headers = (e && e.headers) || {};
+  var direct = headers[name];
+
+  if (direct) {
+    return direct;
+  }
+
+  var lowerName = String(name).toLowerCase();
+  return headers[lowerName] || '';
+}
+
+function saveImageToDrive_(blob, filename) {
+  var folderId = getDriveFolderId_();
+
+  if (!folderId) {
+    throw new Error('DRIVE_FOLDER_ID が未設定です。');
+  }
+
+  var folder = DriveApp.getFolderById(folderId);
+  var file = folder.createFile(blob.setName(filename));
+
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+
+  return {
+    id: file.getId(),
+    url: 'https://drive.google.com/thumbnail?id=' + file.getId() + '&sz=w1000'
+  };
 }

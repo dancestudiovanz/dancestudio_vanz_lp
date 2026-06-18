@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <?!= include('styles'); ?>
+  </head>
+  <body>
+    <div id="admin-login" class="login-wrap">
+      <h1>掲示板管理</h1>
+      <p>管理パスワードでログインしてください。</p>
+      <div id="admin-error" class="login-error" role="alert"></div>
+      <form id="adminLoginForm">
+        <label for="adminPassword">管理パスワード</label>
+        <input id="adminPassword" type="password" required />
+        <button type="submit">ログイン</button>
+      </form>
+    </div>
+
+    <div id="admin-app" class="admin-wrap" style="display: none">
+      <header class="admin-header">
+        <h1>掲示板投稿ダッシュボード</h1>
+        <button id="logoutBtn" type="button" class="admin-secondary">ログアウト</button>
+      </header>
+
+      <div id="admin-message" class="admin-message"></div>
+
+      <form id="postForm" class="admin-form">
+        <input type="hidden" id="rowIndex" />
+        <label>投稿日 <input id="postDate" type="date" /></label>
+        <label>カテゴリー <input id="category" type="text" placeholder="曲 / 衣装 / おしらせ" /></label>
+        <label>タイトル <input id="title" type="text" required /></label>
+        <label>曜日 <input id="weekday" type="text" placeholder="月 / 水 / 金" /></label>
+        <label>クラス <input id="className" type="text" placeholder="幼児 / 低学年 / can☆bang / vanZ / HIPHOP" /></label>
+        <label>本文 <textarea id="body" rows="5"></textarea></label>
+        <label>URL <input id="url" type="url" placeholder="https://..." /></label>
+        <div class="admin-images">
+          <div>
+            <label>画像1 URL <input id="image1" type="url" /></label>
+            <input id="file1" type="file" accept="image/*" />
+          </div>
+          <div>
+            <label>画像2 URL <input id="image2" type="url" /></label>
+            <input id="file2" type="file" accept="image/*" />
+          </div>
+          <div>
+            <label>画像3 URL <input id="image3" type="url" /></label>
+            <input id="file3" type="file" accept="image/*" />
+          </div>
+          <div>
+            <label>画像4 URL <input id="image4" type="url" /></label>
+            <input id="file4" type="file" accept="image/*" />
+          </div>
+        </div>
+
+        <div class="admin-actions">
+          <button type="submit">保存</button>
+          <button id="resetBtn" type="button" class="admin-secondary">新規作成に戻す</button>
+        </div>
+      </form>
+
+      <section>
+        <h2>投稿一覧</h2>
+        <div id="postsList" class="admin-list"></div>
+      </section>
+    </div>
+
+    <script>
+      (function () {
+        var ADMIN_TOKEN_KEY = 'vanz_admin_token';
+        var token = sessionStorage.getItem(ADMIN_TOKEN_KEY) || '';
+
+        var loginRoot = document.getElementById('admin-login');
+        var appRoot = document.getElementById('admin-app');
+        var errorEl = document.getElementById('admin-error');
+        var messageEl = document.getElementById('admin-message');
+
+        document.getElementById('adminLoginForm').addEventListener('submit', function (event) {
+          event.preventDefault();
+          errorEl.textContent = '';
+          google.script.run
+            .withSuccessHandler(function (res) {
+              if (!res || !res.ok) {
+                errorEl.textContent = (res && res.message) || 'ログインに失敗しました。';
+                return;
+              }
+              token = res.token;
+              sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
+              showApp();
+              loadPosts();
+            })
+            .withFailureHandler(function (err) {
+              errorEl.textContent = err.message || 'ログインに失敗しました。';
+            })
+            .loginAdmin(document.getElementById('adminPassword').value);
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', function () {
+          token = '';
+          sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+          showLogin();
+        });
+
+        document.getElementById('postForm').addEventListener('submit', function (event) {
+          event.preventDefault();
+          var post = collectFormData();
+          google.script.run
+            .withSuccessHandler(function () {
+              setMessage('保存しました。');
+              resetForm();
+              loadPosts();
+            })
+            .withFailureHandler(function (err) {
+              setMessage(err.message || '保存に失敗しました。', true);
+            })
+            .upsertAdminPost(token, post);
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', function () {
+          resetForm();
+        });
+
+        [1, 2, 3, 4].forEach(function (idx) {
+          document.getElementById('file' + idx).addEventListener('change', function (event) {
+            var file = event.target.files && event.target.files[0];
+            if (!file) return;
+            var reader = new FileReader();
+            reader.onload = function (e) {
+              google.script.run
+                .withSuccessHandler(function (res) {
+                  if (res && res.ok) {
+                    document.getElementById('image' + idx).value = res.url;
+                    setMessage('画像' + idx + 'をアップロードしました。');
+                  } else {
+                    setMessage((res && res.message) || 'アップロードに失敗しました。', true);
+                  }
+                })
+                .withFailureHandler(function (err) {
+                  setMessage(err.message || 'アップロードに失敗しました。', true);
+                })
+                .uploadAdminImage(token, e.target.result, file.name);
+            };
+            reader.readAsDataURL(file);
+          });
+        });
+
+        function collectFormData() {
+          return {
+            rowIndex: Number(document.getElementById('rowIndex').value) || 0,
+            postDate: document.getElementById('postDate').value,
+            category: document.getElementById('category').value,
+            title: document.getElementById('title').value,
+            weekday: document.getElementById('weekday').value,
+            className: document.getElementById('className').value,
+            body: document.getElementById('body').value,
+            url: document.getElementById('url').value,
+            imageUrls: [
+              document.getElementById('image1').value,
+              document.getElementById('image2').value,
+              document.getElementById('image3').value,
+              document.getElementById('image4').value
+            ]
+          };
+        }
+
+        function fillForm(post) {
+          document.getElementById('rowIndex').value = post.rowIndex || '';
+          document.getElementById('postDate').value = post.postDate || '';
+          document.getElementById('category').value = post.category || '';
+          document.getElementById('title').value = post.title || '';
+          document.getElementById('weekday').value = post.weekday || '';
+          document.getElementById('className').value = post.className || '';
+          document.getElementById('body').value = post.body || '';
+          document.getElementById('url').value = post.url || '';
+          for (var i = 0; i < 4; i++) {
+            document.getElementById('image' + (i + 1)).value = (post.imageUrls && post.imageUrls[i]) || '';
+          }
+        }
+
+        function resetForm() {
+          document.getElementById('postForm').reset();
+          document.getElementById('rowIndex').value = '';
+        }
+
+        function loadPosts() {
+          google.script.run
+            .withSuccessHandler(function (res) {
+              renderPosts(res && res.posts ? res.posts : []);
+            })
+            .withFailureHandler(function (err) {
+              setMessage(err.message || '投稿一覧の取得に失敗しました。', true);
+              if (/セッション/.test(err.message || '')) {
+                showLogin();
+              }
+            })
+            .listAdminPosts(token, 1);
+        }
+
+        function renderPosts(posts) {
+          var root = document.getElementById('postsList');
+          if (!posts.length) {
+            root.innerHTML = '<p>投稿がありません。</p>';
+            return;
+          }
+          var html = '';
+          for (var i = 0; i < posts.length; i++) {
+            var post = posts[i];
+            html += '<article class="admin-item">';
+            html += '<h3>' + esc(post.title) + '</h3>';
+            html += '<p class="admin-meta">' + esc(post.postDate || '—') + ' / ' + esc(post.category || '未設定') + '</p>';
+            html += '<div class="admin-item-actions">';
+            html += '<button type="button" data-edit="' + post.rowIndex + '">編集</button>';
+            html += '<button type="button" data-delete="' + post.rowIndex + '" class="admin-danger">削除</button>';
+            html += '</div>';
+            html += '</article>';
+          }
+          root.innerHTML = html;
+
+          root.querySelectorAll('button[data-edit]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var idx = Number(btn.getAttribute('data-edit'));
+              var target = posts.filter(function (item) {
+                return item.rowIndex === idx;
+              })[0];
+              if (target) fillForm(target);
+            });
+          });
+
+          root.querySelectorAll('button[data-delete]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+              var idx = Number(btn.getAttribute('data-delete'));
+              if (!confirm('この投稿を削除しますか？')) return;
+              google.script.run
+                .withSuccessHandler(function () {
+                  setMessage('削除しました。');
+                  loadPosts();
+                })
+                .withFailureHandler(function (err) {
+                  setMessage(err.message || '削除に失敗しました。', true);
+                })
+                .deleteAdminPost(token, idx);
+            });
+          });
+        }
+
+        function showLogin() {
+          loginRoot.style.display = 'block';
+          appRoot.style.display = 'none';
+        }
+
+        function showApp() {
+          loginRoot.style.display = 'none';
+          appRoot.style.display = 'block';
+        }
+
+        function setMessage(text, isError) {
+          messageEl.textContent = text || '';
+          messageEl.className = isError ? 'admin-message error' : 'admin-message';
+        }
+
+        function esc(text) {
+          return String(text || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+        }
+
+        if (token) {
+          showApp();
+          loadPosts();
+        } else {
+          showLogin();
+        }
+      })();
+    </script>
+  </body>
+</html>

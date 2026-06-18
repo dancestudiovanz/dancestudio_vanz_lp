@@ -13,6 +13,10 @@ function doGet(e) {
       at: new Date().toISOString()
     });
 
+    if (params.admin === '1') {
+      return renderAdminPage_();
+    }
+
     // 常に login.html（ログイン＋掲示板を同一ページで表示）
     return renderLoginPage_();
   } catch (err) {
@@ -31,16 +35,21 @@ function doGet(e) {
 }
 
 function doPost(e) {
-  saveWebhookDebug_('LINE投稿は無効化されています: ' + new Date().toISOString());
-  return ContentService.createTextOutput('LINE posting is disabled').setMimeType(
-    ContentService.MimeType.TEXT
-  );
+  return handleLineWebhook_(e);
 }
 
 function renderLoginPage_() {
   return HtmlService.createTemplateFromFile('login')
     .evaluate()
     .setTitle('会員専用掲示板')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function renderAdminPage_() {
+  return HtmlService.createTemplateFromFile('admin')
+    .evaluate()
+    .setTitle('掲示板管理')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

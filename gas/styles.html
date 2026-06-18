@@ -318,6 +318,125 @@
     min-height: 1.2em;
   }
 
+  /* admin */
+  .admin-wrap {
+    max-width: 980px;
+    margin: 16px auto;
+  }
+
+  .admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .admin-header h1 {
+    margin: 0;
+    font-size: 20px;
+  }
+
+  .admin-form {
+    display: grid;
+    gap: 10px;
+    padding: 14px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    background: #fff;
+  }
+
+  .admin-form label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .admin-form input,
+  .admin-form textarea {
+    width: 100%;
+    margin-top: 4px;
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+  }
+
+  .admin-images {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+
+  .admin-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .admin-actions button,
+  .admin-item-actions button,
+  .admin-secondary {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fff;
+    cursor: pointer;
+    font-weight: 700;
+  }
+
+  .admin-actions button[type='submit'] {
+    background: #e11d48;
+    border-color: #e11d48;
+    color: #fff;
+  }
+
+  .admin-danger {
+    color: #b91c1c;
+    border-color: #fecaca !important;
+    background: #fff1f2 !important;
+  }
+
+  .admin-message {
+    min-height: 1.2em;
+    margin-bottom: 10px;
+    color: #0f766e;
+    font-size: 13px;
+  }
+
+  .admin-message.error {
+    color: #b91c1c;
+  }
+
+  .admin-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .admin-item {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff;
+  }
+
+  .admin-item h3 {
+    margin: 0 0 6px;
+    font-size: 15px;
+  }
+
+  .admin-meta {
+    margin: 0 0 8px;
+    color: #666;
+    font-size: 12px;
+  }
+
+  .admin-item-actions {
+    display: flex;
+    gap: 8px;
+  }
+
   @media (max-width: 640px) {
     .post-summary {
       grid-template-columns: 1fr auto;

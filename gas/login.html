@@ -145,12 +145,6 @@
               if (post.bodyHtml) {
                 html += '<div class="post-body-text">' + post.bodyHtml + '</div>';
               }
-              if (post.url) {
-                html +=
-                  '<p class="post-link-wrap"><a class="post-link" href="' +
-                  escapeAttr(post.url) +
-                  '" target="_blank" rel="noopener noreferrer">関連リンクを開く</a></p>';
-              }
               if (post.imageUrls && post.imageUrls.length > 0) {
                 html += '<div class="post-images">';
                 for (var j = 0; j < post.imageUrls.length; j++) {
