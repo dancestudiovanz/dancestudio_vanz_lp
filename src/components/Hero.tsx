@@ -94,10 +94,10 @@ export default function Hero({ onNavigate }: HeroProps) {
               <button
                 type="button"
                 onClick={() => onNavigate('announcements')}
-                className="notice-pulse group inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs sm:text-sm font-black text-white backdrop-blur-md shadow-lg shadow-rose-500/25 hover:bg-white/15 hover:-translate-y-0.5 transition-all cursor-pointer"
+                className="notice-pulse group inline-flex items-center gap-2 lg:gap-3 rounded-full border border-white/25 bg-white/10 px-4 py-2 lg:px-6 lg:py-3 text-xs sm:text-sm lg:text-base font-black text-white backdrop-blur-md shadow-lg shadow-rose-500/25 lg:shadow-rose-500/35 hover:bg-white/15 hover:-translate-y-0.5 transition-all cursor-pointer"
                 aria-label="おしらせを見る"
               >
-                <Bell className="notice-bell w-4 h-4 text-rose-100" aria-hidden="true" />
+                <Bell className="notice-bell w-4 h-4 lg:w-5 lg:h-5 text-rose-100" aria-hidden="true" />
                 <span>VANZからのおしらせ</span>
               </button>
             </div>

@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Bell, CalendarDays, Loader2 } from 'lucide-react';
 import { AppPage } from '../appNavigation';
 import { announcements } from '../data';
@@ -22,6 +22,18 @@ const categoryLabel = {
 
 export default function Announcements({ onNavigate }: AnnouncementsProps) {
   const [isLoading, setIsLoading] = useState(Boolean(announcementsUrl));
+
+  useEffect(() => {
+    if (!announcementsUrl) {
+      return;
+    }
+
+    const timerId = window.setTimeout(() => {
+      setIsLoading(false);
+    }, 2500);
+
+    return () => window.clearTimeout(timerId);
+  }, []);
 
   if (announcementsUrl) {
     return (
@@ -47,7 +59,7 @@ export default function Announcements({ onNavigate }: AnnouncementsProps) {
               src={announcementsUrl}
               title="おしらせ"
               className="w-full min-h-[70vh] border-0"
-              loading="lazy"
+              loading="eager"
               onLoad={() => setIsLoading(false)}
             />
           </div>
