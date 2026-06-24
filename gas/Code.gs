@@ -13,6 +13,10 @@ function doGet(e) {
       at: new Date().toISOString()
     });
 
+    if (params.page === 'announcements-data') {
+      return renderAnnouncementsData_(params.callback);
+    }
+
     if (params.page === 'announcements') {
       return renderAnnouncementsPage_();
     }
@@ -64,6 +68,29 @@ function renderAnnouncementsPage_() {
     .setTitle('VANZからのおしらせ')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function renderAnnouncementsData_(callback) {
+  var safeCallback = String(callback || '').trim();
+  var payload = {
+    ok: true,
+    announcements: getPublicAnnouncements().map(function (item) {
+      return {
+        id: item.id,
+        date: item.date,
+        title: item.title,
+        body: item.body
+      };
+    })
+  };
+  var json = JSON.stringify(payload);
+
+  if (safeCallback && /^[A-Za-z_$][0-9A-Za-z_$]*(\.[A-Za-z_$][0-9A-Za-z_$]*)*$/.test(safeCallback)) {
+    return ContentService.createTextOutput(safeCallback + '(' + json + ');')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+
+  return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
 }
 
 function getBoardViewData(token, page) {

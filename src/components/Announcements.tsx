@@ -7,6 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowLeft, Bell, CalendarDays, Loader2 } from 'lucide-react';
 import { AppPage } from '../appNavigation';
 import { announcements } from '../data';
+import { Announcement } from '../types';
 
 interface AnnouncementsProps {
   onNavigate: (page: AppPage) => void;
@@ -20,53 +21,66 @@ const categoryLabel = {
   lesson: 'レッスン'
 };
 
+interface AnnouncementsPayload {
+  ok: boolean;
+  announcements?: Announcement[];
+}
+
+function buildAnnouncementsDataUrl(url: string, callbackName: string) {
+  const dataUrl = new URL(url);
+  dataUrl.searchParams.set('page', 'announcements-data');
+  dataUrl.searchParams.set('callback', callbackName);
+  return dataUrl.toString();
+}
+
 export default function Announcements({ onNavigate }: AnnouncementsProps) {
   const [isLoading, setIsLoading] = useState(Boolean(announcementsUrl));
+  const [remoteAnnouncements, setRemoteAnnouncements] = useState<Announcement[] | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
     if (!announcementsUrl) {
       return;
     }
 
+    const callbackName = `__vanzAnnouncements_${Date.now()}`;
     const timerId = window.setTimeout(() => {
+      setLoadFailed(true);
       setIsLoading(false);
-    }, 2500);
+    }, 8000);
 
-    return () => window.clearTimeout(timerId);
+    const script = document.createElement('script');
+    script.src = buildAnnouncementsDataUrl(announcementsUrl, callbackName);
+    script.async = true;
+    const callbackRegistry = window as unknown as Record<string, (payload: AnnouncementsPayload) => void>;
+
+    callbackRegistry[callbackName] = (payload: AnnouncementsPayload) => {
+      window.clearTimeout(timerId);
+      setRemoteAnnouncements(payload.announcements ?? []);
+      setLoadFailed(!payload.ok);
+      setIsLoading(false);
+      delete callbackRegistry[callbackName];
+      script.remove();
+    };
+
+    script.onerror = () => {
+      window.clearTimeout(timerId);
+      setLoadFailed(true);
+      setIsLoading(false);
+      delete callbackRegistry[callbackName];
+      script.remove();
+    };
+
+    document.body.appendChild(script);
+
+    return () => {
+      window.clearTimeout(timerId);
+      delete callbackRegistry[callbackName];
+      script.remove();
+    };
   }, []);
 
-  if (announcementsUrl) {
-    return (
-      <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 md:py-12">
-          <button
-            type="button"
-            onClick={() => onNavigate('home')}
-            className="inline-flex items-center gap-2 text-sm font-bold text-rose-500 hover:text-rose-600 mb-6 cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            トップページに戻る
-          </button>
-
-          <div className="relative bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden min-h-[70vh]">
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
-                <Loader2 className="w-8 h-8 text-rose-500 animate-spin" aria-hidden="true" />
-                <span className="sr-only">読み込み中</span>
-              </div>
-            )}
-            <iframe
-              src={announcementsUrl}
-              title="おしらせ"
-              className="w-full min-h-[70vh] border-0"
-              loading="eager"
-              onLoad={() => setIsLoading(false)}
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const visibleAnnouncements = announcementsUrl ? (remoteAnnouncements ?? []) : announcements;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 antialiased font-sans">
@@ -93,8 +107,37 @@ export default function Announcements({ onNavigate }: AnnouncementsProps) {
           </p>
         </div>
 
+        {isLoading && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-8 flex items-center justify-center gap-3 text-sm font-bold text-slate-500">
+            <Loader2 className="w-5 h-5 text-rose-500 animate-spin" aria-hidden="true" />
+            おしらせを読み込んでいます
+          </div>
+        )}
+
+        {!isLoading && loadFailed && announcementsUrl && (
+          <div className="bg-white rounded-2xl border border-rose-100 shadow-sm p-5 md:p-6 mb-4">
+            <p className="text-sm font-bold text-slate-600 leading-relaxed">
+              おしらせの読み込みに時間がかかっています。
+              <a
+                href={announcementsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="ml-1 text-rose-500 hover:text-rose-600 underline underline-offset-4"
+              >
+                別画面で確認する
+              </a>
+            </p>
+          </div>
+        )}
+
+        {!isLoading && visibleAnnouncements.length === 0 && !loadFailed && (
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 text-sm md:text-base font-bold text-slate-500">
+            現在、おしらせはありません。
+          </div>
+        )}
+
         <div className="space-y-4">
-          {announcements.map((announcement) => (
+          {!isLoading && visibleAnnouncements.map((announcement) => (
             <article
               key={announcement.id}
               className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5 md:p-6"
