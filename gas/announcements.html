@@ -120,55 +120,25 @@
       <h1>最新情報</h1>
       <p class="lead">休講・イベント・体験レッスンなど、dancestudio VANZからのおしらせを掲載します。</p>
 
-      <div id="announcements-app">
-        <p class="empty">読み込み中...</p>
-      </div>
+      <? var items = getPublicAnnouncements(); ?>
+      <? if (!items || items.length === 0) { ?>
+        <p class="empty">現在、おしらせはありません。</p>
+      <? } else { ?>
+        <ul class="list">
+          <? for (var i = 0; i < items.length; i++) { ?>
+            <? var item = items[i]; ?>
+            <li class="card">
+              <? if (item.date) { ?>
+                <div class="date"><?= item.date ?></div>
+              <? } ?>
+              <h2 class="title"><?= item.title ?></h2>
+              <? if (item.body) { ?>
+                <p class="body"><?= item.body ?></p>
+              <? } ?>
+            </li>
+          <? } ?>
+        </ul>
+      <? } ?>
     </main>
-
-    <script>
-      (function () {
-        var app = document.getElementById('announcements-app');
-
-        google.script.run
-          .withSuccessHandler(function (items) {
-            if (!items || items.length === 0) {
-              app.innerHTML = '<p class="empty">現在、おしらせはありません。</p>';
-              return;
-            }
-
-            var html = '<ul class="list">';
-            for (var i = 0; i < items.length; i++) {
-              var item = items[i];
-              html += '<li class="card">';
-              if (item.date) {
-                html += '<div class="date">' + escapeHtml(item.date) + '</div>';
-              }
-              html += '<h2 class="title">' + escapeHtml(item.title) + '</h2>';
-              if (item.body) {
-                html += '<p class="body">' + escapeHtml(item.body) + '</p>';
-              }
-              html += '</li>';
-            }
-            html += '</ul>';
-            app.innerHTML = html;
-          })
-          .withFailureHandler(function (err) {
-            app.innerHTML =
-              '<p class="error">おしらせの読み込みに失敗しました。<br />' +
-              escapeHtml((err && err.message) || '時間をおいて再度お試しください。') +
-              '</p>';
-          })
-          .getPublicAnnouncements();
-
-        function escapeHtml(value) {
-          return String(value || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-        }
-      })();
-    </script>
   </body>
 </html>
