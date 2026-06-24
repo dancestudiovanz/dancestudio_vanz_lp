@@ -147,6 +147,18 @@ export default function Pricing() {
                   </div>
                 ))}
               </div>
+
+              <div className="rounded-2xl border border-amber-200 bg-white px-4 py-4 sm:px-6 text-center shadow-sm">
+                <p className="text-sm sm:text-base font-extrabold text-amber-800">
+                  ビジター料金
+                </p>
+                <p className="mt-1 text-sm sm:text-lg font-black text-slate-900 tabular-nums">
+                  {formatPriceTax(1800, 1980)}
+                  <span className="text-xs sm:text-sm font-bold text-slate-500 ml-1">
+                    / 1レッスン
+                  </span>
+                </p>
+              </div>
             </div>
           </div>
         </div>

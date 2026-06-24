@@ -14,16 +14,24 @@ export default function Hero() {
       className="relative min-h-[92vh] flex items-center justify-center overflow-hidden bg-slate-950 text-white pt-20"
     >
       <div className="absolute inset-0 z-0">
-        <img
-          src={images.hero}
-          alt="武豊町のキッズダンス教室 dancestudio VANZ"
-          width="1600"
-          height="900"
-          decoding="async"
-          fetchPriority="high"
-          className="w-full h-full object-cover opacity-90 md:opacity-95 brightness-110 contrast-[1.02] saturate-[1.05] animate-subtle-zoom"
-          referrerPolicy="no-referrer"
-        />
+        <picture className="block w-full h-full">
+          <source
+            media="(max-width: 767px)"
+            srcSet={images.heroMobileWebp}
+            type="image/webp"
+          />
+          <source srcSet={images.heroWebp} type="image/webp" />
+          <img
+            src={images.hero}
+            alt="武豊町のキッズダンス教室 dancestudio VANZ"
+            width="1448"
+            height="1086"
+            decoding="async"
+            fetchPriority="high"
+            className="w-full h-full object-cover opacity-90 md:opacity-95 brightness-110 contrast-[1.02] saturate-[1.05] animate-subtle-zoom"
+            referrerPolicy="no-referrer"
+          />
+        </picture>
         <div className="absolute inset-0 bg-slate-900/10" />
         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/5 to-slate-900/20" />
       </div>

@@ -30,6 +30,8 @@ export const studioAddress = {
 export const images = {
   logo: '/assets/images/logo-vanz.png',
   hero: '/assets/images/top03.png',
+  heroWebp: '/assets/images/top03.webp',
+  heroMobileWebp: '/assets/images/top03-sp.webp',
   kids: '/assets/images/kizdance_1.png',
   aerobics: '/assets/images/aerobikusu_1.png',
   yoga: '/assets/images/yoga_1.png',
