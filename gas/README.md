@@ -8,7 +8,9 @@
 
 [`spreadsheet-setup.txt`](spreadsheet-setup.txt) の【1】〜【5】を順に設定してください。
 
-または [`Posts-template.csv`](Posts-template.csv) をインポート後、シート名を `お知らせ` に変更。
+または [`Posts-template.csv`](Posts-template.csv) をインポート後、シート名を `掲示板` に変更。
+
+同じスプレッドシートに、LP公開用のシート `おしらせ` も作成します。
 
 **列構成（11列）:**
 
@@ -19,6 +21,14 @@
 - **カテゴリー**: 曲 / 衣装 / おしらせ
 - **曜日**: 月 / 水 / 金（空欄可）
 - **クラス**: 幼児 / 低学年 / can☆bang / vanZ / HIPHOP（空欄可）
+
+### LP公開用おしらせシート
+
+シート名: `おしらせ`
+
+```
+公開日 | タイトル | 本文
+```
 
 ## GAS へのコード配置
 
@@ -48,7 +58,7 @@
 
 | 操作 | 方法 |
 |------|------|
-| 内容を直す | シート `お知らせ` の該当セルを直接編集 |
+| 内容を直す | シート `掲示板` の該当セルを直接編集 |
 | 掲示板から消す | 該当行を削除 |
 | 下書きとして残す | 別シートへ行を移動 |
 
@@ -67,6 +77,7 @@
 
 ```
 VITE_MEMBER_BOARD_URL=https://script.google.com/macros/s/xxxxxxxx/exec
+VITE_ANNOUNCEMENTS_URL=https://script.google.com/macros/s/xxxxxxxx/exec?page=announcements
 ```
 
 ## 診断

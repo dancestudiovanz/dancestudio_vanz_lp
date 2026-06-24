@@ -60,6 +60,14 @@ export interface ScheduleEvent {
   hiphopType?: 'kids' | 'adult';
 }
 
+export interface Announcement {
+  id: string;
+  date: string;
+  title: string;
+  body: string;
+  category?: 'notice' | 'event' | 'lesson';
+}
+
 export interface Booking {
   id: string;
   lessonId: string;

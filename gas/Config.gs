@@ -6,7 +6,8 @@
  *   DRIVE_FOLDER_ID（画像URL用・任意）
  */
 
-var SHEET_NAME = 'お知らせ';
+var SHEET_NAME = '掲示板';
+var ANNOUNCEMENTS_SHEET_NAME = 'おしらせ';
 var PAGE_SIZE = 10;
 var SESSION_DAYS = 7;
 

@@ -134,7 +134,9 @@ export default function Instructors() {
         </div>
 
         {featuredInstructors.map((instructor) => (
-          <FeaturedInstructorCard key={instructor.name} instructor={instructor} />
+          <React.Fragment key={instructor.name}>
+            <FeaturedInstructorCard instructor={instructor} />
+          </React.Fragment>
         ))}
 
         {/* その他インストラクター */}

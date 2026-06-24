@@ -13,6 +13,10 @@ function doGet(e) {
       at: new Date().toISOString()
     });
 
+    if (params.page === 'announcements') {
+      return renderAnnouncementsPage_();
+    }
+
     if (params.admin === '1') {
       return renderAdminPage_();
     }
@@ -50,6 +54,14 @@ function renderAdminPage_() {
   return HtmlService.createTemplateFromFile('admin')
     .evaluate()
     .setTitle('掲示板管理')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
+    .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
+}
+
+function renderAnnouncementsPage_() {
+  return HtmlService.createTemplateFromFile('announcements')
+    .evaluate()
+    .setTitle('VANZからのおしらせ')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }

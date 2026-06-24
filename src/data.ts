@@ -10,7 +10,8 @@ import {
   ScheduleEvent,
   FAQItem,
   KidsDancePricing,
-  LessonTicketPricing
+  LessonTicketPricing,
+  Announcement
 } from './types';
 
 /** 公式LINE（アカウントURLに合わせて変更してください） */
@@ -18,6 +19,23 @@ export const officialLineUrl = 'https://lin.ee/P5pFiaA';
 
 /** 公式Instagram */
 export const officialInstagramUrl = 'https://www.instagram.com/dancestudio_vanz/';
+
+export const announcements: Announcement[] = [
+  {
+    id: 'trial-lesson',
+    date: '2026.06.24',
+    title: '無料体験レッスン受付中',
+    body: 'キッズダンス・エアロビクス・癒しのヨガの体験を受付中です。気になるクラスがありましたら、公式LINEよりお気軽にお問い合わせください。',
+    category: 'lesson'
+  },
+  {
+    id: 'kids-dance',
+    date: '2026.06.24',
+    title: 'キッズダンスクラスのご案内',
+    body: '幼児・低学年・高学年・中学生でクラス分けをしています。初めてのお子さまも安心して参加できるよう、年齢やペースに合わせて丁寧にサポートします。',
+    category: 'notice'
+  }
+];
 
 export const studioAddress = {
   postal: '470-2347',

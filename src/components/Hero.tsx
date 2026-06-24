@@ -4,10 +4,15 @@
  */
 
 import React from 'react';
-import { Calendar, Award, CheckCircle } from 'lucide-react';
+import { Calendar, Award, CheckCircle, Bell } from 'lucide-react';
+import { AppPage } from '../appNavigation';
 import { images, officialLineUrl } from '../data';
 
-export default function Hero() {
+interface HeroProps {
+  onNavigate: (page: AppPage) => void;
+}
+
+export default function Hero({ onNavigate }: HeroProps) {
   return (
     <section
       id="hero"
@@ -83,6 +88,18 @@ export default function Hero() {
                 <CheckCircle className="w-4 h-4 text-amber-500 shrink-0 drop-shadow-md" />
                 <span className="drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">発表会も続けやすい費用</span>
               </div>
+            </div>
+
+            <div className="max-w-xl flex justify-end">
+              <button
+                type="button"
+                onClick={() => onNavigate('announcements')}
+                className="notice-pulse group inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/10 px-4 py-2 text-xs sm:text-sm font-black text-white backdrop-blur-md shadow-lg shadow-rose-500/25 hover:bg-white/15 hover:-translate-y-0.5 transition-all cursor-pointer"
+                aria-label="おしらせを見る"
+              >
+                <Bell className="notice-bell w-4 h-4 text-rose-100" aria-hidden="true" />
+                <span>VANZからのおしらせ</span>
+              </button>
             </div>
 
             <div>

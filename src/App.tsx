@@ -18,6 +18,7 @@ import TermsOfService from './components/TermsOfService';
 import SpecifiedCommercialTransactions from './components/SpecifiedCommercialTransactions';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import MemberBoard from './components/MemberBoard';
+import Announcements from './components/Announcements';
 import { AppPage, navigateApp, pageFromHash } from './appNavigation';
 
 export default function App() {
@@ -61,12 +62,16 @@ export default function App() {
     return <MemberBoard onNavigate={goToPage} />;
   }
 
+  if (page === 'announcements') {
+    return <Announcements onNavigate={goToPage} />;
+  }
+
   return (
     <div className="min-h-screen flex flex-col antialiased text-slate-800 bg-slate-50 font-sans">
       <Header onNavClick={scrollToSection} onNavigate={goToPage} />
 
       <main className="flex-1">
-        <Hero />
+        <Hero onNavigate={goToPage} />
         <Problems />
         <Solutions />
         <Lessons />

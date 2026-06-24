@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type AppPage = 'home' | 'terms' | 'tokusho' | 'privacy' | 'member-board';
+export type AppPage = 'home' | 'terms' | 'tokusho' | 'privacy' | 'member-board' | 'announcements';
 
 export function pageFromHash(): AppPage {
   const hash = window.location.hash;
@@ -11,6 +11,7 @@ export function pageFromHash(): AppPage {
   if (hash === '#tokusho') return 'tokusho';
   if (hash === '#privacy') return 'privacy';
   if (hash === '#member-board') return 'member-board';
+  if (hash === '#announcements') return 'announcements';
   return 'home';
 }
 
