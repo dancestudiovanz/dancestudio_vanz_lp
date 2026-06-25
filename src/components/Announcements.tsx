@@ -145,7 +145,7 @@ export default function Announcements({ onNavigate }: AnnouncementsProps) {
               <h2 className="mt-3 text-lg md:text-xl font-black text-slate-900">
                 {announcement.title}
               </h2>
-              <p className="mt-2 text-sm md:text-base leading-relaxed text-slate-600">
+              <p className="mt-2 text-sm md:text-base leading-relaxed text-slate-600 whitespace-pre-line">
                 {announcement.body}
               </p>
             </article>
