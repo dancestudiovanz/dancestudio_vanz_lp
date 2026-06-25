@@ -26,13 +26,6 @@ interface AnnouncementsPayload {
   announcements?: Announcement[];
 }
 
-function buildAnnouncementsDataUrl(url: string, callbackName: string) {
-  const dataUrl = new URL(url);
-  dataUrl.searchParams.set('page', 'announcements-data');
-  dataUrl.searchParams.set('callback', callbackName);
-  return dataUrl.toString();
-}
-
 export default function Announcements({ onNavigate }: AnnouncementsProps) {
   const [isLoading, setIsLoading] = useState(Boolean(announcementsUrl));
   const [remoteAnnouncements, setRemoteAnnouncements] = useState<Announcement[] | null>(null);
@@ -43,40 +36,36 @@ export default function Announcements({ onNavigate }: AnnouncementsProps) {
       return;
     }
 
-    const callbackName = `__vanzAnnouncements_${Date.now()}`;
-    const timerId = window.setTimeout(() => {
-      setLoadFailed(true);
-      setIsLoading(false);
-    }, 20000);
+    const controller = new AbortController();
+    const timerId = window.setTimeout(() => controller.abort(), 20000);
 
-    const script = document.createElement('script');
-    script.src = buildAnnouncementsDataUrl(announcementsUrl, callbackName);
-    script.async = true;
-    const callbackRegistry = window as unknown as Record<string, (payload: AnnouncementsPayload) => void>;
-
-    callbackRegistry[callbackName] = (payload: AnnouncementsPayload) => {
-      window.clearTimeout(timerId);
-      setRemoteAnnouncements(payload.announcements ?? []);
-      setLoadFailed(!payload.ok);
-      setIsLoading(false);
-      delete callbackRegistry[callbackName];
-      script.remove();
-    };
-
-    script.onerror = () => {
-      window.clearTimeout(timerId);
-      setLoadFailed(true);
-      setIsLoading(false);
-      delete callbackRegistry[callbackName];
-      script.remove();
-    };
-
-    document.body.appendChild(script);
+    fetch('/api/announcements', {
+      signal: controller.signal,
+      headers: {
+        Accept: 'application/json'
+      }
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`Announcements API responded with ${response.status}`);
+        }
+        return response.json() as Promise<AnnouncementsPayload>;
+      })
+      .then((payload) => {
+        setRemoteAnnouncements(payload.announcements ?? []);
+        setLoadFailed(!payload.ok);
+      })
+      .catch(() => {
+        setLoadFailed(true);
+      })
+      .finally(() => {
+        window.clearTimeout(timerId);
+        setIsLoading(false);
+      });
 
     return () => {
       window.clearTimeout(timerId);
-      delete callbackRegistry[callbackName];
-      script.remove();
+      controller.abort();
     };
   }, []);
 
