@@ -47,7 +47,7 @@ export default function Announcements({ onNavigate }: AnnouncementsProps) {
     const timerId = window.setTimeout(() => {
       setLoadFailed(true);
       setIsLoading(false);
-    }, 8000);
+    }, 20000);
 
     const script = document.createElement('script');
     script.src = buildAnnouncementsDataUrl(announcementsUrl, callbackName);
