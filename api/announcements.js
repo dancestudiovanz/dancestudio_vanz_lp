@@ -46,8 +46,16 @@ function requestText(url, redirectCount = 0) {
   });
 }
 
+function normalizeSourceUrl(value) {
+  return String(value || '')
+    .trim()
+    .replace(/^Value\s*:\s*/i, '')
+    .replace(/^["']|["']$/g, '')
+    .trim();
+}
+
 export default async function handler(request, response) {
-  const sourceUrl = process.env.VITE_ANNOUNCEMENTS_URL || process.env.ANNOUNCEMENTS_URL;
+  const sourceUrl = normalizeSourceUrl(process.env.VITE_ANNOUNCEMENTS_URL || process.env.ANNOUNCEMENTS_URL);
 
   if (!sourceUrl) {
     response.status(500).json({ ok: false, message: 'Announcements URL is not configured.' });
