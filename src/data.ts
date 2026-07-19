@@ -20,6 +20,10 @@ export const officialLineUrl = 'https://lin.ee/P5pFiaA';
 /** 公式Instagram */
 export const officialInstagramUrl = 'https://www.instagram.com/dancestudio_vanz/';
 
+/** レッスン風景（YouTube） */
+export const lessonSceneYoutubeUrl =
+  'https://youtu.be/XeJnbHeKScE?si=AE-mCVVEJsfmY5ww';
+
 export const announcements: Announcement[] = [
   {
     id: 'trial-lesson',

@@ -4,9 +4,9 @@
  */
 
 import React from 'react';
-import { Calendar, Award, CheckCircle, Bell } from 'lucide-react';
+import { Calendar, Award, CheckCircle, Bell, Youtube } from 'lucide-react';
 import { AppPage } from '../appNavigation';
-import { images, officialLineUrl } from '../data';
+import { images, lessonSceneYoutubeUrl, officialLineUrl } from '../data';
 
 interface HeroProps {
   onNavigate: (page: AppPage) => void;
@@ -90,11 +90,21 @@ export default function Hero({ onNavigate }: HeroProps) {
               </div>
             </div>
 
-            <div className="max-w-xl flex justify-end">
+            <div className="max-w-xl flex flex-col sm:flex-row sm:justify-end gap-2 sm:gap-3">
+              <a
+                href={lessonSceneYoutubeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex w-full sm:w-auto items-center justify-center gap-2 lg:gap-3 rounded-full border border-white/25 bg-white/10 px-4 py-2 lg:px-6 lg:py-3 text-xs sm:text-sm lg:text-base font-black text-white backdrop-blur-md shadow-lg shadow-rose-500/25 lg:shadow-rose-500/35 hover:bg-white/15 hover:-translate-y-0.5 transition-all"
+                aria-label="VANZレッスン風景をYouTubeで見る"
+              >
+                <Youtube className="w-4 h-4 lg:w-5 lg:h-5 text-rose-100" aria-hidden="true" />
+                <span>VANZレッスン風景はこちら</span>
+              </a>
               <button
                 type="button"
                 onClick={() => onNavigate('announcements')}
-                className="notice-pulse group inline-flex items-center gap-2 lg:gap-3 rounded-full border border-white/25 bg-white/10 px-4 py-2 lg:px-6 lg:py-3 text-xs sm:text-sm lg:text-base font-black text-white backdrop-blur-md shadow-lg shadow-rose-500/25 lg:shadow-rose-500/35 hover:bg-white/15 hover:-translate-y-0.5 transition-all cursor-pointer"
+                className="notice-pulse group inline-flex w-full sm:w-auto items-center justify-center gap-2 lg:gap-3 rounded-full border border-white/25 bg-white/10 px-4 py-2 lg:px-6 lg:py-3 text-xs sm:text-sm lg:text-base font-black text-white backdrop-blur-md shadow-lg shadow-rose-500/25 lg:shadow-rose-500/35 hover:bg-white/15 hover:-translate-y-0.5 transition-all cursor-pointer"
                 aria-label="おしらせを見る"
               >
                 <Bell className="notice-bell w-4 h-4 lg:w-5 lg:h-5 text-rose-100" aria-hidden="true" />
