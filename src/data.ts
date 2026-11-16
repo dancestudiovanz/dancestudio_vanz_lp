@@ -218,6 +218,15 @@ export const scheduleEvents: ScheduleEvent[] = [
     instructorName: '中村'
   },
   {
+    id: 'sch-11',
+    dayOfWeek: 'Monday',
+    timeStart: '18:30',
+    timeEnd: '19:30',
+    lessonTitle: 'boys',
+    instructorName: 'chika',
+    category: 'kids'
+  },
+  {
     id: 'sch-2',
     dayOfWeek: 'Monday',
     timeStart: '19:40',
@@ -239,15 +248,6 @@ export const scheduleEvents: ScheduleEvent[] = [
     category: 'aerobics',
     requiresTicket: true,
     instructorName: 'chika'
-  },
-  {
-    id: 'sch-4',
-    dayOfWeek: 'Wednesday',
-    timeStart: '16:00',
-    timeEnd: '16:50',
-    lessonTitle: '幼児',
-    instructorName: 'chika',
-    category: 'kids'
   },
   {
     id: 'sch-5',
